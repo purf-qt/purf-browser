@@ -5,10 +5,12 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTabWidget>
-#include <QtWebKitWidgets/QWebView>
+#include <QWebEngineView>
+#include <QWebEngineSettings>
 #include <QUrl>
+#include <QKeyEvent>
 
-// IMPORTANT: These headers fix the "SocketState/SslError" errors you saw
+// IMPORTANT: These headers fix the "SocketState/SslError" errors
 #include <QtNetwork/QAbstractSocket>
 #include <QtNetwork/QSslError>
 
@@ -48,25 +50,43 @@ public:
 
 private slots:
     void addNewTab() {
-        QWebView *web = new QWebView();
+        QWebEngineView *web = new QWebEngineView();
+        
+        // FIX: Enable CSS and all web features
+        QWebEngineSettings *settings = web->settings();
+        settings->setAttribute(QWebEngineSettings::JavascriptEnabled, true);
+        settings->setAttribute(QWebEngineSettings::JavascriptCanOpenWindows, true);
+        settings->setAttribute(QWebEngineSettings::JavascriptCanAccessClipboard, true);
+        settings->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+        settings->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
+        settings->setAttribute(QWebEngineSettings::XSSAuditingEnabled, false);
+        
         web->load(QUrl("https://www.google.com"));
+        
+        // IMPORTANT FIX: Set focus policy so keyboard input works
+        web->setFocusPolicy(Qt::StrongFocus);
         
         int index = tabs->addTab(web, "New Tab");
         tabs->setCurrentIndex(index);
 
         // Update tab title when page loads
-        connect(web, &QWebView::titleChanged, [=](const QString &title){
+        connect(web, &QWebEngineView::titleChanged, [=](const QString &title){
             tabs->setTabText(tabs->indexOf(web), title.left(15) + "...");
         });
+        
+        // Give focus to the web view when tab is shown
+        web->setFocus();
     }
 
     void loadUrl() {
         QString urlText = addressBar->text();
         if (!urlText.startsWith("http")) urlText.prepend("https://");
         
-        QWebView *currentWeb = qobject_cast<QWebView*>(tabs->currentWidget());
+        QWebEngineView *currentWeb = qobject_cast<QWebEngineView*>(tabs->currentWidget());
         if (currentWeb) {
             currentWeb->load(QUrl(urlText));
+            // Set focus to web view after loading
+            currentWeb->setFocus();
         }
     }
 
@@ -75,7 +95,7 @@ private:
     QLineEdit *addressBar;
 };
 
-#include "main.moc" // Required if putting everything in one .cpp file
+#include "main.moc"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
