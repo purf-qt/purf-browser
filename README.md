@@ -1,5 +1,8 @@
 # purf-browser
 Lightweight browser built in C++ and QTWebkit
+# Photo
+<img width="2048" height="1200" alt="photo" src="https://github.com/user-attachments/assets/d3ab5799-86be-4012-aec2-c0e0602c600c" />
+
 # Installing & Building
 Void Linux:
 ```
