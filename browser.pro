@@ -1,6 +1,5 @@
-QT       += core gui widgets webkitwidgets network
-CONFIG   += c++17
-
-# Essential for GCC 14 compatibility with older Qt 5 headers
-QMAKE_CXXFLAGS += -fpermissive
+QT += core gui webenginewidgets network
+CONFIG += c++11
+TARGET = purf-browser
+TEMPLATE = app
 SOURCES += main.cpp
